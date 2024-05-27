@@ -1,40 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ItemsContext from "./ItemsContext";
+
+const API_URL =
+  "https://crudcrud.com/api/7ceaa46aa79147fc817eb74862f608e0/bookMarks";
 
 function ItemProvider(props) {
   const [items, setItems] = useState([]);
 
+  useEffect(() => {
+    axios
+      .get(API_URL)
+      .then((response) => {
+        setItems(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching items:", error);
+      });
+  }, []);
+
   const addItem = (item) => {
     const newItem = {
       ...item,
-      id: Date.now(),
       dateAdded: new Date().toISOString(),
     };
-    setItems((prevItems) => [...prevItems, newItem]);
-    console.log("add item", newItem);
+
+    axios
+      .post(API_URL, newItem)
+      .then((response) => {
+        setItems((prevItems) => [...prevItems, response.data]);
+      })
+      .catch((error) => {
+        console.error("Error adding item:", error);
+      });
   };
 
   const editItem = (itemId, newItem) => {
-    const updatedItems = items.map((item) =>
-      item.id === itemId ? { ...item, ...newItem } : item
-    );
-    setItems(updatedItems);
+    const updatedItem = {
+      ...newItem,
+      dateAdded: new Date().toISOString(),
+    };
+
+    axios
+      .put(`${API_URL}/${itemId}`, updatedItem)
+      .then(() => {
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item._id === itemId ? { ...item, ...updatedItem } : item
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error editing item:", error);
+      });
   };
 
   const deleteItem = (itemId) => {
-    const updatedItems = items.filter((item) => item.id !== itemId);
-    setItems(updatedItems);
-  };
-
-  const itemContext = {
-    items: items,
-    add: addItem,
-    edit: editItem,
-    delete: deleteItem,
+    axios
+      .delete(`${API_URL}/${itemId}`)
+      .then(() => {
+        setItems((prevItems) =>
+          prevItems.filter((item) => item._id !== itemId)
+        );
+      })
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+      });
   };
 
   return (
-    <ItemsContext.Provider value={itemContext}>
+    <ItemsContext.Provider value={{ items, addItem, editItem, deleteItem }}>
       {props.children}
     </ItemsContext.Provider>
   );

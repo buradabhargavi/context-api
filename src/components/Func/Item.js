@@ -3,16 +3,16 @@ import Button from "../layouts/Button";
 import ItemsContext from "../Store/ItemsContext";
 
 function Item({ item }) {
-  const { delete: deleteItem, edit: editItem } = useContext(ItemsContext);
+  const { deleteItem, editItem } = useContext(ItemsContext);
 
   const handleDelete = () => {
-    deleteItem(item.id);
+    deleteItem(item._id);
   };
 
   const handleEdit = () => {
     const newUrl = prompt("Enter new URL:", item.url);
     if (newUrl) {
-      editItem(item.id, { url: newUrl });
+      editItem(item._id, { url: newUrl });
     }
   };
 

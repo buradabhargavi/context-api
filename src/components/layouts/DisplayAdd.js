@@ -11,7 +11,7 @@ function DisplayAdd(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (url.trim() !== "") {
-      ctx.add({ url: url });
+      ctx.addItem({ url: url });
       setUrl("");
       props.show();
     }
